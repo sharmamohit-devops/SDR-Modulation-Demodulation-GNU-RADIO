@@ -1,0 +1,364 @@
+options:
+  parameters:
+    author: Mohit Sharma
+    catch_exceptions: 'True'
+    category: '[Custom]'
+    cmake_opt: ''
+    comment: Amplitude-shift keying / on-off keying simulation using a square-wave envelope, carrier multiplication,
+      envelope detection, and threshold slicing.
+    copyright: ''
+    description: Amplitude-shift keying / on-off keying simulation using a square-wave envelope, carrier multiplication,
+      envelope detection, and threshold slicing.
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: ask_ook_mod_demod_lab
+    max_nouts: '0'
+    output_language: python
+    placement: (0, 0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: ASK/OOK Modulation & Demodulation Lab
+    window_size: 1800, 900
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 8
+    - 8.0
+    rotation: 0
+    state: true
+blocks:
+- name: fs
+  id: variable
+  parameters:
+    value: '48000'
+    comment: Baseband sample rate in samples per second.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 24.0
+    rotation: 0
+    state: true
+- name: bit_rate
+  id: variable
+  parameters:
+    value: '1000'
+    comment: Toggle rate for this visual OOK test signal (square-wave source).
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 80.0
+    rotation: 0
+    state: true
+- name: noise
+  id: variable
+  parameters:
+    value: '0.0'
+    comment: Channel Model noise voltage; start at zero.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 136.0
+    rotation: 0
+    state: true
+- name: ook_envelope
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    waveform: analog.GR_SQR_WAVE
+    samp_rate: fs
+    freq: bit_rate
+    amp: '0.5'
+    offset: '0.5'
+    phase: '0'
+    showports: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 280.0
+    rotation: 0
+    state: true
+- name: envelope_to_complex
+  id: blocks_float_to_complex
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 280
+    - 280.0
+    rotation: 0
+    state: true
+- name: carrier
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+    samp_rate: fs
+    freq: '10000'
+    amp: '1'
+    offset: '0'
+    phase: '0'
+    showports: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 280
+    - 430.0
+    rotation: 0
+    state: true
+- name: ask_modulator
+  id: blocks_multiply_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: complex
+    num_inputs: '2'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 530
+    - 280.0
+    rotation: 0
+    state: true
+- name: channel
+  id: channels_channel_model
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: No RF hardware; simulated channel only.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    block_tags: 'False'
+    epsilon: '1.0'
+    freq_offset: '0.0'
+    seed: '2026'
+    taps: '[1.0]'
+    noise_voltage: noise
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 770
+    - 280.0
+    rotation: 0
+    state: true
+- name: throttle
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: auto
+    maximum: '0.1'
+    samples_per_second: fs
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1010
+    - 280.0
+    rotation: 0
+    state: true
+- name: tx_monitor
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Complex envelope-keyed signal after channel.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bw: fs
+    fc: '0'
+    fftsize: '1024'
+    gui_hint: ''
+    name: '''OOK/ASK Received Signal'''
+    plotconst: 'True'
+    plotfreq: 'True'
+    plotwaterfall: 'True'
+    plottime: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1250
+    - 280.0
+    rotation: 0
+    state: true
+- name: envelope_detector
+  id: blocks_complex_to_mag
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1250
+    - 480.0
+    rotation: 0
+    state: true
+- name: decision_centering
+  id: blocks_add_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    const: '-0.5'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1490
+    - 480.0
+    rotation: 0
+    state: true
+- name: bit_slicer
+  id: digital_binary_slicer_fb
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1730
+    - 480.0
+    rotation: 0
+    state: true
+- name: bit_output_sink
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Consumes hard decisions (0/1). The graph does not compute BER.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bus_structure_sink: '[[0,],]'
+    num_inputs: '1'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1970
+    - 480.0
+    rotation: 0
+    state: true
+connections:
+- - ook_envelope
+  - '0'
+  - envelope_to_complex
+  - '0'
+- - envelope_to_complex
+  - '0'
+  - ask_modulator
+  - '0'
+- - carrier
+  - '0'
+  - ask_modulator
+  - '1'
+- - ask_modulator
+  - '0'
+  - channel
+  - '0'
+- - channel
+  - '0'
+  - throttle
+  - '0'
+- - throttle
+  - '0'
+  - tx_monitor
+  - '0'
+- - throttle
+  - '0'
+  - envelope_detector
+  - '0'
+- - envelope_detector
+  - '0'
+  - decision_centering
+  - '0'
+- - decision_centering
+  - '0'
+  - bit_slicer
+  - '0'
+- - bit_slicer
+  - '0'
+  - bit_output_sink
+  - '0'
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0

@@ -1,0 +1,763 @@
+options:
+  parameters:
+    author: Mohit Sharma
+    catch_exceptions: 'True'
+    category: '[Custom]'
+    cmake_opt: ''
+    comment: Compare BPSK, QPSK and 16-QAM digital constellation modulation and symbol decoding under a software
+      channel model.
+    copyright: ''
+    description: 'Parallel digital constellation lab: BPSK, QPSK and 16-QAM; synthetic bytes, channel-noise control,
+      timing recovery and constellation visualization.'
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: digital_modulation_comparison_lab
+    max_nouts: '0'
+    output_language: python
+    placement: (0, 0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: SDR Modulation & Demodulation Toolkit - BPSK QPSK 16-QAM
+    window_size: 1800, 1250
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 8
+    - 8.0
+    rotation: 0
+    state: true
+blocks:
+- name: fs
+  id: variable
+  parameters:
+    value: 1e6
+    comment: Complex baseband sample rate in samples per second.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 24.0
+    rotation: 0
+    state: true
+- name: sps
+  id: variable
+  parameters:
+    value: '4'
+    comment: Samples per symbol for all three branches.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 80.0
+    rotation: 0
+    state: true
+- name: rolloff
+  id: variable
+  parameters:
+    value: '0.35'
+    comment: RRC pulse-shaping roll-off factor.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 136.0
+    rotation: 0
+    state: true
+- name: noise
+  id: variable
+  parameters:
+    value: '0.0'
+    comment: Channel Model noise voltage; start at zero and raise gradually.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 192.0
+    rotation: 0
+    state: true
+- name: bpsk
+  id: variable
+  parameters:
+    value: digital.constellation_bpsk().base()
+    comment: BPSK constellation object.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 260
+    - 24.0
+    rotation: 0
+    state: true
+- name: qpsk
+  id: variable
+  parameters:
+    value: digital.constellation_qpsk().base()
+    comment: QPSK constellation object.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 260
+    - 80.0
+    rotation: 0
+    state: true
+- name: qam16
+  id: variable
+  parameters:
+    value: digital.constellation_16qam().base()
+    comment: 16-QAM constellation object.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 260
+    - 136.0
+    rotation: 0
+    state: true
+- name: test_bytes
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Deterministic byte sequence repeated continuously; no external file required.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: byte
+    vector: '[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+      27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
+      54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+      81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105,
+      106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127,
+      128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+      150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171,
+      172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193,
+      194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215,
+      216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237,
+      238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255]'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 32
+    - 650.0
+    rotation: 0
+    state: true
+- name: bpsk_mod
+  id: digital_constellation_modulator
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: BPSK transmitter with RRC pulse shaping.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    constellation: bpsk
+    differential: 'False'
+    rolloff: rolloff
+    log: 'False'
+    samples_per_symbol: sps
+    truncate: 'False'
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 280
+    - 340.0
+    rotation: 0
+    state: true
+- name: bpsk_channel
+  id: channels_channel_model
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: BPSK channel. Frequency offset disabled for baseline decoding.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    block_tags: 'False'
+    epsilon: '1.0'
+    freq_offset: '0.0'
+    seed: '2026'
+    taps: '[1.0]'
+    noise_voltage: noise
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 520
+    - 340.0
+    rotation: 0
+    state: true
+- name: bpsk_throttle
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Limit software-only processing rate; no RF hardware.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: auto
+    maximum: '0.1'
+    samples_per_second: fs
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 740
+    - 340.0
+    rotation: 0
+    state: true
+- name: bpsk_sync
+  id: digital_symbol_sync_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: BPSK symbol timing recovery; tune loop parameters if required.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    constellation: bpsk
+    damping: '0.707107'
+    loop_bw: '0.00628318'
+    max_dev: '1.5'
+    nfilters: '32'
+    osps: '1'
+    pfb_mf_taps: '[]'
+    resamp_type: digital.IR_MMSE_8TAP
+    sps: sps
+    ted_gain: '1.0'
+    ted_type: digital.TED_GARDNER
+    type: cc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 960
+    - 340.0
+    rotation: 0
+    state: true
+- name: bpsk_decoder
+  id: digital_constellation_decoder_cb
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: BPSK constellation decision / symbol decoder.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    constellation: bpsk
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1200
+    - 340.0
+    rotation: 0
+    state: true
+- name: bpsk_null
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Consumes decoded symbol indexes. This graph does not perform byte framing or BER measurement.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bus_structure_sink: '[[0,],]'
+    num_inputs: '1'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1440
+    - 340.0
+    rotation: 0
+    state: true
+- name: bpsk_gui
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Visual monitor for BPSK symbols after timing recovery.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bw: fs/sps
+    fc: '0'
+    fftsize: '1024'
+    gui_hint: ''
+    name: '''BPSK Recovered Symbols: constellation / spectrum / time / waterfall'''
+    plotconst: 'True'
+    plotfreq: 'True'
+    plotwaterfall: 'True'
+    plottime: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 960
+    - 490.0
+    rotation: 0
+    state: true
+- name: qpsk_mod
+  id: digital_constellation_modulator
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: QPSK transmitter with RRC pulse shaping.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    constellation: qpsk
+    differential: 'False'
+    rolloff: rolloff
+    log: 'False'
+    samples_per_symbol: sps
+    truncate: 'False'
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 280
+    - 680.0
+    rotation: 0
+    state: true
+- name: qpsk_channel
+  id: channels_channel_model
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: QPSK channel. Frequency offset disabled for baseline decoding.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    block_tags: 'False'
+    epsilon: '1.0'
+    freq_offset: '0.0'
+    seed: '2027'
+    taps: '[1.0]'
+    noise_voltage: noise
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 520
+    - 680.0
+    rotation: 0
+    state: true
+- name: qpsk_throttle
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Limit software-only processing rate; no RF hardware.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: auto
+    maximum: '0.1'
+    samples_per_second: fs
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 740
+    - 680.0
+    rotation: 0
+    state: true
+- name: qpsk_sync
+  id: digital_symbol_sync_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: QPSK symbol timing recovery; tune loop parameters if required.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    constellation: qpsk
+    damping: '0.707107'
+    loop_bw: '0.00628318'
+    max_dev: '1.5'
+    nfilters: '32'
+    osps: '1'
+    pfb_mf_taps: '[]'
+    resamp_type: digital.IR_MMSE_8TAP
+    sps: sps
+    ted_gain: '1.0'
+    ted_type: digital.TED_GARDNER
+    type: cc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 960
+    - 680.0
+    rotation: 0
+    state: true
+- name: qpsk_decoder
+  id: digital_constellation_decoder_cb
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: QPSK constellation decision / symbol decoder.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    constellation: qpsk
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1200
+    - 680.0
+    rotation: 0
+    state: true
+- name: qpsk_null
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Consumes decoded symbol indexes. This graph does not perform byte framing or BER measurement.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bus_structure_sink: '[[0,],]'
+    num_inputs: '1'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1440
+    - 680.0
+    rotation: 0
+    state: true
+- name: qpsk_gui
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Visual monitor for QPSK symbols after timing recovery.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bw: fs/sps
+    fc: '0'
+    fftsize: '1024'
+    gui_hint: ''
+    name: '''QPSK Recovered Symbols: constellation / spectrum / time / waterfall'''
+    plotconst: 'True'
+    plotfreq: 'True'
+    plotwaterfall: 'True'
+    plottime: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 960
+    - 830.0
+    rotation: 0
+    state: true
+- name: qam16_mod
+  id: digital_constellation_modulator
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 16-QAM transmitter with RRC pulse shaping.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    constellation: qam16
+    differential: 'False'
+    rolloff: rolloff
+    log: 'False'
+    samples_per_symbol: sps
+    truncate: 'False'
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 280
+    - 1020.0
+    rotation: 0
+    state: true
+- name: qam16_channel
+  id: channels_channel_model
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 16-QAM channel. Frequency offset disabled for baseline decoding.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    block_tags: 'False'
+    epsilon: '1.0'
+    freq_offset: '0.0'
+    seed: '2028'
+    taps: '[1.0]'
+    noise_voltage: noise
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 520
+    - 1020.0
+    rotation: 0
+    state: true
+- name: qam16_throttle
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Limit software-only processing rate; no RF hardware.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: auto
+    maximum: '0.1'
+    samples_per_second: fs
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 740
+    - 1020.0
+    rotation: 0
+    state: true
+- name: qam16_sync
+  id: digital_symbol_sync_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 16-QAM symbol timing recovery; tune loop parameters if required.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    constellation: qam16
+    damping: '0.707107'
+    loop_bw: '0.00628318'
+    max_dev: '1.5'
+    nfilters: '32'
+    osps: '1'
+    pfb_mf_taps: '[]'
+    resamp_type: digital.IR_MMSE_8TAP
+    sps: sps
+    ted_gain: '1.0'
+    ted_type: digital.TED_GARDNER
+    type: cc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 960
+    - 1020.0
+    rotation: 0
+    state: true
+- name: qam16_decoder
+  id: digital_constellation_decoder_cb
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 16-QAM constellation decision / symbol decoder.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    constellation: qam16
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1200
+    - 1020.0
+    rotation: 0
+    state: true
+- name: qam16_null
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Consumes decoded symbol indexes. This graph does not perform byte framing or BER measurement.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bus_structure_sink: '[[0,],]'
+    num_inputs: '1'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1440
+    - 1020.0
+    rotation: 0
+    state: true
+- name: qam16_gui
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Visual monitor for 16-QAM symbols after timing recovery.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bw: fs/sps
+    fc: '0'
+    fftsize: '1024'
+    gui_hint: ''
+    name: '''16-QAM Recovered Symbols: constellation / spectrum / time / waterfall'''
+    plotconst: 'True'
+    plotfreq: 'True'
+    plotwaterfall: 'True'
+    plottime: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 960
+    - 1170.0
+    rotation: 0
+    state: true
+connections:
+- - test_bytes
+  - '0'
+  - bpsk_mod
+  - '0'
+- - bpsk_mod
+  - '0'
+  - bpsk_channel
+  - '0'
+- - bpsk_channel
+  - '0'
+  - bpsk_throttle
+  - '0'
+- - bpsk_throttle
+  - '0'
+  - bpsk_sync
+  - '0'
+- - bpsk_sync
+  - '0'
+  - bpsk_gui
+  - '0'
+- - bpsk_sync
+  - '0'
+  - bpsk_decoder
+  - '0'
+- - bpsk_decoder
+  - '0'
+  - bpsk_null
+  - '0'
+- - test_bytes
+  - '0'
+  - qpsk_mod
+  - '0'
+- - qpsk_mod
+  - '0'
+  - qpsk_channel
+  - '0'
+- - qpsk_channel
+  - '0'
+  - qpsk_throttle
+  - '0'
+- - qpsk_throttle
+  - '0'
+  - qpsk_sync
+  - '0'
+- - qpsk_sync
+  - '0'
+  - qpsk_gui
+  - '0'
+- - qpsk_sync
+  - '0'
+  - qpsk_decoder
+  - '0'
+- - qpsk_decoder
+  - '0'
+  - qpsk_null
+  - '0'
+- - test_bytes
+  - '0'
+  - qam16_mod
+  - '0'
+- - qam16_mod
+  - '0'
+  - qam16_channel
+  - '0'
+- - qam16_channel
+  - '0'
+  - qam16_throttle
+  - '0'
+- - qam16_throttle
+  - '0'
+  - qam16_sync
+  - '0'
+- - qam16_sync
+  - '0'
+  - qam16_gui
+  - '0'
+- - qam16_sync
+  - '0'
+  - qam16_decoder
+  - '0'
+- - qam16_decoder
+  - '0'
+  - qam16_null
+  - '0'
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0

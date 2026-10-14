@@ -1,0 +1,274 @@
+options:
+  parameters:
+    author: Mohit Sharma
+    catch_exceptions: 'True'
+    category: '[Custom]'
+    cmake_opt: ''
+    comment: Self-contained GFSK modulation/demodulation loopback over a simulated channel.
+    copyright: ''
+    description: Built-in byte test source -> GFSK Mod -> channel model -> GFSK Demod. No hardware or custom code.
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: gfsk_mod_demod_lab
+    max_nouts: '0'
+    output_language: python
+    placement: (0, 0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: GFSK Modulation & Demodulation Lab
+    window_size: 1500, 850
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 8
+    - 8.0
+    rotation: 0
+    state: true
+blocks:
+- name: fs
+  id: variable
+  parameters:
+    value: 1e6
+    comment: Complex baseband sample rate.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 24.0
+    rotation: 0
+    state: true
+- name: sps
+  id: variable
+  parameters:
+    value: '4'
+    comment: Samples per bit/symbol; minimum 2 for GFSK.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 80.0
+    rotation: 0
+    state: true
+- name: noise
+  id: variable
+  parameters:
+    value: '0.0'
+    comment: Channel noise voltage; start at zero.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 136.0
+    rotation: 0
+    state: true
+- name: bits_in
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Repeating bit-like byte sequence; GFSK Mod Unpack is disabled so each item is treated as a symbol.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: byte
+    vector: '[0, 1, 0, 1, 1, 0, 1, 0, 1]'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 300.0
+    rotation: 0
+    state: true
+- name: gfsk_mod
+  id: digital_gfsk_mod
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_symbol: sps
+    sensitivity: '1.0'
+    bt: '0.35'
+    verbose: 'False'
+    log: 'False'
+    do_unpack: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 260
+    - 300.0
+    rotation: 0
+    state: true
+- name: channel
+  id: channels_channel_model
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    block_tags: 'False'
+    epsilon: '1.0'
+    freq_offset: '0.0'
+    seed: '2026'
+    taps: '[1.0]'
+    noise_voltage: noise
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 500
+    - 300.0
+    rotation: 0
+    state: true
+- name: throttle
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: auto
+    maximum: '0.1'
+    samples_per_second: fs
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 760
+    - 300.0
+    rotation: 0
+    state: true
+- name: gfsk_demod
+  id: digital_gfsk_demod
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_symbol: sps
+    sensitivity: '1.0'
+    gain_mu: '0.175'
+    mu: '0.5'
+    omega_relative_limit: '0.005'
+    freq_error: '0.0'
+    verbose: 'False'
+    log: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1000
+    - 300.0
+    rotation: 0
+    state: true
+- name: bits_sink
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Consumes recovered bit stream; use a GUI bit sink if you want to inspect individual decisions.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bus_structure_sink: '[[0,],]'
+    num_inputs: '1'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1260
+    - 300.0
+    rotation: 0
+    state: true
+- name: gfsk_signal_monitor
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Complex GFSK signal after channel model.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bw: fs
+    fc: '0'
+    fftsize: '1024'
+    gui_hint: ''
+    name: '''GFSK Baseband Signal'''
+    plotconst: 'True'
+    plotfreq: 'True'
+    plotwaterfall: 'True'
+    plottime: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 780
+    - 500.0
+    rotation: 0
+    state: true
+connections:
+- - bits_in
+  - '0'
+  - gfsk_mod
+  - '0'
+- - gfsk_mod
+  - '0'
+  - channel
+  - '0'
+- - channel
+  - '0'
+  - throttle
+  - '0'
+- - throttle
+  - '0'
+  - gfsk_demod
+  - '0'
+- - gfsk_demod
+  - '0'
+  - bits_sink
+  - '0'
+- - throttle
+  - '0'
+  - gfsk_signal_monitor
+  - '0'
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0

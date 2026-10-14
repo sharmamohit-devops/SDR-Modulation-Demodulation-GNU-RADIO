@@ -1,0 +1,378 @@
+options:
+  parameters:
+    author: Mohit Sharma
+    catch_exceptions: 'True'
+    category: '[Custom]'
+    cmake_opt: ''
+    comment: Software-only AM transmitter and envelope-detector receiver with time/spectrum visualization.
+    copyright: ''
+    description: Software-only AM transmitter and envelope-detector receiver with time/spectrum visualization.
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: am_mod_demod_lab
+    max_nouts: '0'
+    output_language: python
+    placement: (0, 0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: AM Modulation & Envelope Demodulation Lab
+    window_size: 1800, 950
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 8
+    - 8.0
+    rotation: 0
+    state: true
+blocks:
+- name: fs
+  id: variable
+  parameters:
+    value: '48000'
+    comment: Audio/baseband sample rate in samples per second.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 24.0
+    rotation: 0
+    state: true
+- name: mod_depth
+  id: variable
+  parameters:
+    value: '0.5'
+    comment: AM modulation depth; keep <= 1 to avoid overmodulation.
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 80.0
+    rotation: 0
+    state: true
+- name: message
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    waveform: analog.GR_COS_WAVE
+    samp_rate: fs
+    freq: '1000'
+    amp: mod_depth
+    offset: '0'
+    phase: '0'
+    showports: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 240.0
+    rotation: 0
+    state: true
+- name: carrier_level
+  id: analog_const_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    const: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 24
+    - 360.0
+    rotation: 0
+    state: true
+- name: envelope
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    num_inputs: '2'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 300
+    - 260.0
+    rotation: 0
+    state: true
+- name: envelope_to_complex
+  id: blocks_float_to_complex
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 540
+    - 260.0
+    rotation: 0
+    state: true
+- name: carrier
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+    samp_rate: fs
+    freq: '10000'
+    amp: '1'
+    offset: '0'
+    phase: '0'
+    showports: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 540
+    - 400.0
+    rotation: 0
+    state: true
+- name: am_modulator
+  id: blocks_multiply_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: complex
+    num_inputs: '2'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 800
+    - 260.0
+    rotation: 0
+    state: true
+- name: throttle
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Software-only sample rate limiter; no RF hardware.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: auto
+    maximum: '0.1'
+    samples_per_second: fs
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1040
+    - 260.0
+    rotation: 0
+    state: true
+- name: tx_monitor
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Complex AM signal after modulation.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bw: fs
+    fc: '0'
+    fftsize: '1024'
+    gui_hint: ''
+    name: '''AM Modulated Signal: time / spectrum / IQ'''
+    plotconst: 'True'
+    plotfreq: 'True'
+    plotwaterfall: 'True'
+    plottime: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1280
+    - 260.0
+    rotation: 0
+    state: true
+- name: envelope_detector
+  id: blocks_complex_to_mag
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1280
+    - 470.0
+    rotation: 0
+    state: true
+- name: remove_carrier_level
+  id: blocks_add_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    const: '-1.0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1510
+    - 470.0
+    rotation: 0
+    state: true
+- name: recovered_to_complex
+  id: blocks_float_to_complex
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1740
+    - 470.0
+    rotation: 0
+    state: true
+- name: recovered_message_monitor
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Envelope-detected message, displayed on the real axis.
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    bw: fs
+    fc: '0'
+    fftsize: '1024'
+    gui_hint: ''
+    name: '''AM Demodulated Message (real part)'''
+    plotconst: 'False'
+    plotfreq: 'True'
+    plotwaterfall: 'False'
+    plottime: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1980
+    - 470.0
+    rotation: 0
+    state: true
+connections:
+- - message
+  - '0'
+  - envelope
+  - '0'
+- - carrier_level
+  - '0'
+  - envelope
+  - '1'
+- - envelope
+  - '0'
+  - envelope_to_complex
+  - '0'
+- - envelope_to_complex
+  - '0'
+  - am_modulator
+  - '0'
+- - carrier
+  - '0'
+  - am_modulator
+  - '1'
+- - am_modulator
+  - '0'
+  - throttle
+  - '0'
+- - throttle
+  - '0'
+  - tx_monitor
+  - '0'
+- - throttle
+  - '0'
+  - envelope_detector
+  - '0'
+- - envelope_detector
+  - '0'
+  - remove_carrier_level
+  - '0'
+- - remove_carrier_level
+  - '0'
+  - recovered_to_complex
+  - '0'
+- - recovered_to_complex
+  - '0'
+  - recovered_message_monitor
+  - '0'
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0
